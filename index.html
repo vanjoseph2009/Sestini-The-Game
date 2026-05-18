@@ -1,17 +1,16 @@
 <!DOCTYPE html>
 <html lang="pt-pt">
 <head>
-    <!-- Mantenha o Head e CSS igual ao anterior, apenas adicionei um ajuste no botão de áudio -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sestini The Game - Relax Edition</title>
+    <title>Sestini The Game - Mobile Pro</title>
     <style>
-        /* ... (Mantenha todo o CSS anterior) ... */
         :root {
             --primary: #c41230; 
             --bg-color: #f4f4f9;
-            --tube-color: rgba(255, 255, 255, 0.6);
-            --tube-border: rgba(255, 255, 255, 0.8);
+            /* Melhorei a visibilidade do tubo com cores mais nítidas */
+            --tube-bg: rgba(0, 0, 0, 0.15);
+            --tube-border: #444; 
             --text-color: #333;
             --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
@@ -22,29 +21,110 @@
             margin: 0; padding: 0; font-family: var(--font-main);
             background-color: var(--bg-color); background-size: cover;
             background-position: center; transition: background-image 1.2s ease-in-out;
-            color: var(--text-color); overflow: hidden; display: flex;
-            flex-direction: column; height: 100vh;
+            color: var(--text-color); overflow: hidden; 
+            display: flex; flex-direction: column; height: 100vh;
         }
 
-        .bg-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.4); z-index: 0; }
-        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; z-index: 10; }
+        .bg-overlay { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(255, 255, 255, 0.3); z-index: 0; 
+        }
+
+        .screen { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            display: none; flex-direction: column; align-items: center; z-index: 10; 
+        }
+
         .screen.active { display: flex; }
-        #menu-screen { background: linear-gradient(135deg, rgba(196, 18, 48, 0.9) 0%, rgba(139, 13, 34, 0.9) 100%); color: white; z-index: 20; }
-        .logo { font-size: 3.5rem; font-weight: 900; margin-bottom: 0.5rem; text-shadow: 2px 4px 10px rgba(0,0,0,0.3); letter-spacing: 2px; }
-        .nickname-container { margin-bottom: 20px; background: rgba(255,255,255,0.2); padding: 12px 25px; border-radius: 20px; cursor: pointer; border: 2px solid rgba(255,255,255,0.3); display: flex; align-items: center; gap: 12px; }
-        .btn { background: white; color: var(--primary); border: none; padding: 15px 40px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; margin: 8px; width: 260px; cursor: pointer; box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
-        #game-header { width: 100%; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(5px); position: relative; z-index: 15; }
-        #game-area { flex-grow: 1; width: 100%; display: flex; flex-wrap: wrap; justify-content: center; align-content: center; padding: 20px; gap: 15px; position: relative; z-index: 10; }
-        .tube { width: 65px; height: 210px; background: linear-gradient(to bottom, var(--tube-color), rgba(255,255,255,0.2)); border: 4px solid var(--tube-border); border-radius: 0 0 35px 35px; display: flex; flex-direction: column-reverse; align-items: center; padding-bottom: 10px; cursor: pointer; transition: all 0.3s; }
-        .tube.selected { transform: translateY(-15px); border-color: var(--primary); }
-        .item { width: 50px; height: 45px; display: flex; align-items: center; justify-content: center; font-size: 28px; }
-        .controls { padding: 20px; display: flex; gap: 15px; justify-content: center; z-index: 15; }
-        .icon-btn { background: white; border: none; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.15); cursor: pointer; position: relative; }
-        .btn-price-tag { position: absolute; bottom: -5px; background: #222; color: white; font-size: 0.6rem; padding: 2px 5px; border-radius: 10px; }
-        #audio-toggle { position: fixed; bottom: 20px; right: 20px; z-index: 1000; background: rgba(0,0,0,0.5); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; }
-        .modal { background: white; border-radius: 20px; padding: 20px; width: 90%; max-width: 400px; text-align: center; }
-        .store-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
-        .buy-btn { background: var(--primary); color: white; border: none; padding: 5px 10px; border-radius: 10px; cursor: pointer; }
+
+        #menu-screen { 
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(196, 18, 48, 0.95) 0%, rgba(139, 13, 34, 0.95) 100%); 
+            color: white; z-index: 20; 
+        }
+
+        /* --- ESTRUTURA DO JOGO (FIXO NA TELA) --- */
+        #game-screen { display: none; flex-direction: column; height: 100vh; }
+        #game-screen.active { display: flex; }
+
+        #game-header { 
+            height: 70px; width: 100%; padding: 0 20px;
+            display: flex; justify-content: space-between; align-items: center; 
+            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 15;
+        }
+
+        /* Área dos tubos: Agora usa Grid para se ajustar ao mobile */
+        #game-area { 
+            flex-grow: 1; width: 100%; 
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
+            gap: 10px; padding: 15px;
+            align-content: center; justify-items: center;
+            overflow-y: auto; /* Permite scroll se houver muitos tubos, mas prioriza caber tudo */
+            z-index: 10;
+        }
+
+        /* --- MELHORIA VISUAL DOS TUBOS --- */
+        .tube { 
+            width: 60px; height: 180px; 
+            background: var(--tube-bg);
+            border: 3px solid var(--tube-border);
+            border-top: none;
+            border-radius: 0 0 30px 30px;
+            display: flex; flex-direction: column-reverse; align-items: center;
+            padding-bottom: 8px; cursor: pointer; transition: all 0.2s;
+            position: relative;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.2);
+        }
+
+        .tube.selected { 
+            transform: translateY(-10px); 
+            border-color: var(--primary);
+            background: rgba(196, 18, 48, 0.1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .item { 
+            width: 45px; height: 40px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 28px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+        }
+
+        /* --- CONTROLES FIXOS NO RODAPÉ --- */
+        .controls { 
+            height: 90px; width: 100%;
+            display: flex; gap: 12px; justify-content: center; align-items: center;
+            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0,0,0,0.05); z-index: 15;
+            padding-bottom: env(safe-area-inset-bottom); /* Suporte para iPhone X+ */
+        }
+
+        .icon-btn { 
+            background: white; border: 2px solid #ddd; width: 50px; height: 50px; 
+            border-radius: 15px; display: flex; align-items: center; justify-content: center; 
+            font-size: 1.3rem; box-shadow: 0 3px 6px rgba(0,0,0,0.1); cursor: pointer; 
+        }
+
+        /* Botão de Áudio */
+        #audio-toggle { 
+            position: fixed; top: 15px; right: 80px; z-index: 1000; 
+            background: rgba(0,0,0,0.3); color: white; border: none; 
+            width: 40px; height: 40px; border-radius: 50%;
+        }
+
+        .btn { 
+            background: white; color: var(--primary); border: none; padding: 15px 40px; 
+            border-radius: 50px; font-size: 1.1rem; font-weight: bold; margin: 8px; width: 260px; 
+        }
+
+        /* Ajustes para telas muito pequenas */
+        @media (max-height: 600px) {
+            .tube { height: 150px; width: 55px; }
+            .item { font-size: 24px; }
+            #game-header { height: 50px; }
+            .controls { height: 70px; }
+        }
     </style>
 </head>
 <body>
@@ -52,143 +132,117 @@
     <button id="audio-toggle" onclick="toggleAudio()">🔇</button>
     <div class="bg-overlay"></div>
 
-    <!-- Menus (Simplificados para o exemplo funcional) -->
+    <!-- MENU -->
     <div id="menu-screen" class="screen active">
-        <div class="logo">SESTINI</div>
-        <div style="margin-bottom: 2rem;">THE GAME</div>
-        <button class="btn" onclick="startGame()">JOGAR</button>
+        <div style="font-size: 3rem; font-weight: 900; letter-spacing: 2px;">SESTINI</div>
+        <div style="margin-bottom: 2rem; opacity: 0.8;">THE GAME</div>
+        <button class="btn" onclick="startGame()">JOGAR AGORA</button>
         <button class="btn" style="background:#222; color:white" onclick="showScreen('store-screen')">LOJA</button>
     </div>
 
+    <!-- JOGO -->
     <div id="game-screen" class="screen">
         <div id="game-header">
-            <div>Fase: <span id="lvl-txt">1</span></div>
-            <div style="color:var(--primary)">💰 <span id="coins-txt">0</span></div>
-            <div onclick="showScreen('menu-screen')" style="cursor:pointer">🏠</div>
+            <div>Fase: <span id="lvl-txt" style="font-weight:bold">1</span></div>
+            <div style="color:var(--primary); font-weight:bold">💰 <span id="coins-txt">0</span></div>
+            <div onclick="showScreen('menu-screen')" style="font-size:1.5rem">🏠</div>
         </div>
-        <div id="game-area"></div>
+
+        <div id="game-area">
+            <!-- Tubos gerados aqui -->
+        </div>
+
         <div class="controls">
-            <button class="icon-btn" onclick="undoMove()">↩️</button>
-            <button class="icon-btn" onclick="restartLevel()">🔄</button>
-            <button class="icon-btn" onclick="useHint()">💡</button>
+            <button class="icon-btn" onclick="undoMove()" title="Voltar">↩️</button>
+            <button class="icon-btn" onclick="restartLevel()" title="Reiniciar">🔄</button>
+            <button class="icon-btn" onclick="useHint()" title="Dica">💡</button>
+            <button class="icon-btn" onclick="buyExtraTube()" style="color:var(--primary)" title="Tubo Extra">+🧪</button>
         </div>
     </div>
 
-    <div id="store-screen" class="screen">
-        <div class="modal">
-            <h3>Loja Sestini</h3>
-            <div class="store-item">
-                <span>+500 Moedas</span>
-                <button class="buy-btn" onclick="addCoins(500)">PEGAR</button>
-            </div>
-            <button class="btn" onclick="showScreen('menu-screen')">VOLTAR</button>
+    <!-- LOJA (Simples) -->
+    <div id="store-screen" class="screen" style="justify-content:center; background: rgba(0,0,0,0.8);">
+        <div style="background:white; padding:30px; border-radius:20px; text-align:center; width:85%">
+            <h2>Sestini Store</h2>
+            <p>Ganhe moedas jogando para liberar novos itens!</p>
+            <button class="btn" onclick="addCoins(500)">PEGAR 500 MOEDAS</button><br>
+            <button class="btn" style="background:#eee; color:#333" onclick="showScreen('menu-screen')">VOLTAR</button>
         </div>
     </div>
 
     <script>
-        // --- MOTOR DE ÁUDIO (RELAXING SYNTH) ---
+        // --- MOTOR DE ÁUDIO RELAXANTE ---
         let audioCtx = null;
         let isMuted = true;
         let musicInterval = null;
         let currentStep = 0;
 
-        // Escalas musicais relaxantes por estágio (Frequências em Hz)
         const SCALES = [
-            [261.63, 293.66, 329.63, 392.00, 440.00], // Estágio 1: Zen (C Pentatônico)
-            [311.13, 349.23, 392.00, 466.16, 523.25], // Estágio 2: Oceano (Eb Major)
-            [196.00, 220.00, 246.94, 293.66, 329.63], // Estágio 3: Floresta (G Major)
-            [277.18, 311.13, 369.99, 415.30, 466.16], // Estágio 4: Sonho (Db Major)
-            [220.00, 261.63, 293.66, 329.63, 392.00]  // Estágio 5: Noite (A Minor)
+            [261.63, 329.63, 392.00, 440.00], // C, E, G, A
+            [293.66, 369.99, 440.00, 493.88], // D, F#, A, B
+            [329.63, 415.30, 493.88, 554.37]  // E, G#, B, C#
         ];
 
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-        }
+        function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
 
-        function playTone(freq, type, duration, vol) {
+        function playTone(freq, duration, vol) {
             if (isMuted || !audioCtx) return;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            osc.type = type;
             osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
             gain.gain.setValueAtTime(vol, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + duration);
-        }
-
-        function startRelaxingMusic() {
-            if (musicInterval) clearInterval(musicInterval);
-            
-            musicInterval = setInterval(() => {
-                if (isMuted || !audioCtx) return;
-
-                // Seleciona a escala baseada no nível atual (1 a 5)
-                const scaleIndex = (gameState.level - 1) % 5;
-                const currentScale = SCALES[scaleIndex];
-                
-                // Melodia principal (Ondas Senoidais - Suaves)
-                if (currentStep % 2 === 0) {
-                    const note = currentScale[Math.floor(Math.random() * currentScale.length)];
-                    playTone(note, 'sine', 1.5, 0.05);
-                }
-
-                // Baixo suave a cada 4 tempos
-                if (currentStep % 4 === 0) {
-                    const bassNote = currentScale[0] / 2;
-                    playTone(bassNote, 'triangle', 2.0, 0.03);
-                }
-
-                currentStep++;
-            }, 800); // Ritmo lento e relaxante
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + duration);
         }
 
         function toggleAudio() {
-            initAudio();
-            isMuted = !isMuted;
+            initAudio(); isMuted = !isMuted;
             document.getElementById('audio-toggle').innerText = isMuted ? '🔇' : '🔊';
             if (!isMuted) {
                 if (audioCtx.state === 'suspended') audioCtx.resume();
-                startRelaxingMusic();
+                if(!musicInterval) startMusic();
             }
         }
 
+        function startMusic() {
+            musicInterval = setInterval(() => {
+                if (isMuted) return;
+                const scale = SCALES[(gameState.level - 1) % SCALES.length];
+                if (currentStep % 2 === 0) playTone(scale[Math.floor(Math.random()*scale.length)], 1.5, 0.05);
+                currentStep++;
+            }, 1000);
+        }
+
         // --- LÓGICA DO JOGO ---
-        let gameState = {
-            level: 1,
-            coins: 100,
-            tubes: [],
-            selected: null,
-            history: []
-        };
-
+        let gameState = { level: 1, coins: 100, tubes: [], selected: null, history: [] };
         const ITEMS = ['🧳', '🎒', '👜', '💼', '👝', '🔒', '🕶️', '🎧'];
+        const BGS = [
+            'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=60',
+            'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=800&q=60',
+            'https://images.unsplash.com/photo-1436491865332-7a61a109c0f3?auto=format&fit=crop&w=800&q=60'
+        ];
 
-        function startGame() {
-            showScreen('game-screen');
-            initLevel();
-            if (!isMuted) startRelaxingMusic();
+        function startGame() { 
+            showScreen('game-screen'); 
+            initLevel(); 
         }
 
         function initLevel() {
             gameState.selected = null;
             gameState.history = [];
-            const colors = Math.min(3 + Math.floor(gameState.level / 2), 8);
+            document.body.style.backgroundImage = `url('${BGS[gameState.level % BGS.length]}')`;
+            
+            const numColors = Math.min(3 + Math.floor(gameState.level / 3), 8);
             let pool = [];
-            for(let i=0; i<colors; i++) {
+            for(let i=0; i<numColors; i++) {
                 for(let j=0; j<4; j++) pool.push(ITEMS[i]);
             }
             pool.sort(() => Math.random() - 0.5);
 
             gameState.tubes = [];
-            for(let i=0; i<colors; i++) {
-                gameState.tubes.push(pool.slice(i*4, i*4+4));
-            }
-            gameState.tubes.push([], []); // Tubos vazios
+            for(let i=0; i<numColors; i++) gameState.tubes.push(pool.slice(i*4, i*4+4));
+            gameState.tubes.push([], []); // Dois tubos vazios
             
             render();
             updateUI();
@@ -197,10 +251,18 @@
         function render() {
             const area = document.getElementById('game-area');
             area.innerHTML = '';
+            
+            // Ajuste dinâmico de tamanho para muitos tubos
+            const tubeWidth = gameState.tubes.length > 8 ? '50px' : '60px';
+            const tubeHeight = gameState.tubes.length > 8 ? '150px' : '180px';
+
             gameState.tubes.forEach((content, idx) => {
                 const tube = document.createElement('div');
                 tube.className = `tube ${gameState.selected === idx ? 'selected' : ''}`;
+                tube.style.width = tubeWidth;
+                tube.style.height = tubeHeight;
                 tube.onclick = () => tapTube(idx);
+                
                 content.forEach(item => {
                     const div = document.createElement('div');
                     div.className = 'item';
@@ -216,7 +278,7 @@
             if (gameState.selected === null) {
                 if (tubes[idx].length > 0) {
                     gameState.selected = idx;
-                    playTone(440, 'sine', 0.1, 0.1); // Som de clique
+                    playTone(400, 0.1, 0.1);
                 }
             } else {
                 const from = gameState.selected;
@@ -226,7 +288,7 @@
                     if (tubes[to].length < 4 && (tubes[to].length === 0 || tubes[to][tubes[to].length-1] === item)) {
                         gameState.history.push(JSON.stringify(tubes));
                         tubes[to].push(tubes[from].pop());
-                        playTone(523, 'sine', 0.1, 0.1); // Som de encaixe
+                        playTone(600, 0.1, 0.1);
                         checkWin();
                     }
                 }
@@ -238,17 +300,39 @@
         function checkWin() {
             const win = gameState.tubes.every(t => t.length === 0 || (t.length === 4 && t.every(v => v === t[0])));
             if (win) {
-                playTone(523, 'triangle', 0.3, 0.2);
-                setTimeout(() => playTone(659, 'triangle', 0.5, 0.2), 200);
-                alert("Parabéns! Próximo destino...");
-                gameState.level++;
-                gameState.coins += 50;
-                initLevel();
-                // A música muda automaticamente no próximo intervalo pois depende do gameState.level
+                setTimeout(() => {
+                    alert("Destino alcançado! +50 moedas");
+                    gameState.level++;
+                    gameState.coins += 50;
+                    initLevel();
+                }, 300);
             }
         }
 
-        // --- UTILITÁRIOS ---
+        function undoMove() {
+            if (gameState.history.length > 0) {
+                gameState.tubes = JSON.parse(gameState.history.pop());
+                render();
+            }
+        }
+
+        function restartLevel() { if(confirm("Reiniciar fase?")) initLevel(); }
+
+        function buyExtraTube() {
+            if(gameState.coins >= 150) {
+                gameState.coins -= 150;
+                gameState.tubes.push([]);
+                render();
+                updateUI();
+            } else { alert("Moedas insuficientes (150 necessário)"); }
+        }
+
+        function useHint() {
+            alert("Dica: Foque em esvaziar um tubo completamente primeiro!");
+            gameState.coins -= 20;
+            updateUI();
+        }
+
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -259,26 +343,7 @@
             document.getElementById('coins-txt').innerText = gameState.coins;
         }
 
-        function undoMove() {
-            if (gameState.history.length > 0) {
-                gameState.tubes = JSON.parse(gameState.history.pop());
-                render();
-            }
-        }
-
-        function restartLevel() { initLevel(); }
-
-        function addCoins(n) {
-            gameState.coins += n;
-            updateUI();
-            alert("Moedas adicionadas para ajudar na sua viagem!");
-        }
-
-        function useHint() {
-            alert("Dica: Tente liberar um tubo vazio primeiro!");
-            gameState.coins -= 10;
-            updateUI();
-        }
+        function addCoins(n) { gameState.coins += n; updateUI(); alert("Você recebeu moedas!"); }
 
     </script>
 </body>
