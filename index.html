@@ -8,7 +8,7 @@
         :root {
             --primary: #c41230; 
             --bg-color: #f4f4f9;
-            --tube-bg: rgba(0, 0, 0, 0.2);
+            --tube-bg: rgba(0, 0, 0, 0.25);
             --tube-border: #333;
             --text-color: #333;
             --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -31,13 +31,23 @@
 
         #menu-screen { justify-content: center; background: linear-gradient(135deg, rgba(196, 18, 48, 0.95) 0%, rgba(139, 13, 34, 0.95) 100%); color: white; z-index: 20; }
 
-        /* --- ESTRUTURA DO JOGO --- */
+        /* --- ESTRUTURA DO CABEÇALHO (HOME ESQUERDA | SOM DIREITA) --- */
         #game-header { 
-            height: 60px; width: 100%; padding: 0 20px; flex-shrink: 0;
+            height: 65px; width: 100%; padding: 0 15px; flex-shrink: 0;
             display: flex; justify-content: space-between; align-items: center; 
-            background: rgba(255, 255, 255, 0.95); z-index: 15;
+            background: rgba(255, 255, 255, 0.95); z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
+        /* Estilo do botão de som dentro do header */
+        #audio-toggle { 
+            background: rgba(0,0,0,0.1); color: #333; border: none; 
+            width: 42px; height: 42px; border-radius: 50%; 
+            cursor: pointer; font-size: 1.2rem; display: flex; 
+            align-items: center; justify-content: center;
+        }
+
+        /* --- ÁREA DE JOGO --- */
         #game-area { 
             flex: 1; width: 100%; display: grid;
             grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
@@ -51,24 +61,25 @@
             border-top: none; border-radius: 0 0 30px 30px;
             display: flex; flex-direction: column-reverse; align-items: center;
             padding-bottom: 8px; cursor: pointer; transition: transform 0.2s;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+            box-shadow: inset 0 0 12px rgba(0,0,0,0.4);
         }
 
-        .tube.selected { transform: translateY(-12px); border-color: var(--primary); background: rgba(196, 18, 48, 0.15); }
+        .tube.selected { transform: translateY(-12px); border-color: var(--primary); background: rgba(196, 18, 48, 0.2); }
 
-        .item { width: 100%; height: 22%; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+        .item { width: 100%; height: 22%; display: flex; align-items: center; justify-content: center; font-size: 26px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3)); }
 
+        /* --- CONTROLES INFERIORES --- */
         .controls { 
-            height: 85px; width: 100%; flex-shrink: 0;
+            height: 90px; width: 100%; flex-shrink: 0;
             display: flex; gap: 12px; justify-content: center; align-items: center;
-            background: rgba(255, 255, 255, 0.9); border-top: 1px solid #ddd;
+            background: rgba(255, 255, 255, 0.95); border-top: 1px solid #ddd;
             padding-bottom: env(safe-area-inset-bottom);
         }
 
         .icon-btn { 
-            background: white; border: 1px solid #ccc; width: 50px; height: 50px; 
+            background: white; border: 1px solid #ccc; width: 52px; height: 52px; 
             border-radius: 15px; display: flex; align-items: center; justify-content: center; 
-            font-size: 1.3rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-size: 1.4rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         /* --- LOJA --- */
@@ -80,15 +91,12 @@
         .store-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
         .buy-btn { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 15px; font-weight: bold; }
         .buy-btn.owned { background: #2ecc71; }
-        .buy-btn:disabled { opacity: 0.6; }
 
-        #audio-toggle { position: fixed; top: 10px; right: 10px; z-index: 1000; background: rgba(0,0,0,0.3); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; }
         .btn { background: white; color: var(--primary); border: none; padding: 15px 40px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; margin: 8px; width: 260px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
 
-    <button id="audio-toggle" onclick="toggleAudio()">🔇</button>
     <div class="bg-overlay"></div>
 
     <!-- MENU -->
@@ -102,11 +110,21 @@
     <!-- JOGO -->
     <div id="game-screen" class="screen">
         <div id="game-header">
-            <div>Fase: <span id="lvl-txt" style="font-weight:bold">1</span></div>
-            <div style="color:var(--primary); font-weight:bold">💰 <span class="coins-val">0</span></div>
-            <div onclick="showScreen('menu-screen')" style="font-size:1.5rem; cursor:pointer">🏠</div>
+            <!-- Home na Esquerda -->
+            <div onclick="showScreen('menu-screen')" style="font-size:1.8rem; cursor:pointer">🏠</div>
+            
+            <!-- Fase e Moedas no Meio -->
+            <div style="display: flex; gap: 20px;">
+                <div>Fase: <span id="lvl-txt" style="font-weight:bold">1</span></div>
+                <div style="color:var(--primary); font-weight:bold">💰 <span class="coins-val">0</span></div>
+            </div>
+
+            <!-- Som na Direita -->
+            <button id="audio-toggle" onclick="toggleAudio()">🔇</button>
         </div>
+
         <div id="game-area"></div>
+
         <div class="controls">
             <button class="icon-btn" onclick="undoMove()">↩️</button>
             <button class="icon-btn" onclick="restartLevel()">🔄</button>
@@ -132,7 +150,66 @@
     </div>
 
     <script>
-        // --- DADOS ---
+        // --- MOTOR DE ÁUDIO RELAXANTE ---
+        let audioCtx = null;
+        let isMuted = true;
+        let musicInterval = null;
+        let currentStep = 0;
+
+        const SCALES = [
+            [261.63, 293.66, 329.63, 392.00, 440.00], // C Pentatonic
+            [311.13, 349.23, 392.00, 466.16, 523.25], // Eb
+            [196.00, 220.00, 246.94, 293.66, 329.63], // G
+            [277.18, 311.13, 369.99, 415.30, 466.16], // Db
+            [220.00, 261.63, 293.66, 329.63, 392.00]  // Am
+        ];
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function playTone(freq, type, duration, vol) {
+            if (isMuted || !audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        function startRelaxingMusic() {
+            if (musicInterval) clearInterval(musicInterval);
+            musicInterval = setInterval(() => {
+                if (isMuted || !audioCtx) return;
+                const scaleIndex = (gameState.level - 1) % 5;
+                const currentScale = SCALES[scaleIndex];
+                if (currentStep % 2 === 0) {
+                    const note = currentScale[Math.floor(Math.random() * currentScale.length)];
+                    playTone(note, 'sine', 1.5, 0.04);
+                }
+                if (currentStep % 4 === 0) playTone(currentScale[0] / 2, 'triangle', 2.0, 0.02);
+                currentStep++;
+            }, 1000);
+        }
+
+        function toggleAudio() {
+            initAudio();
+            isMuted = !isMuted;
+            document.getElementById('audio-toggle').innerText = isMuted ? '🔇' : '🔊';
+            if (!isMuted) {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                startRelaxingMusic();
+            } else {
+                if (musicInterval) clearInterval(musicInterval);
+            }
+        }
+
+        // --- LÓGICA DO JOGO ---
         const SKIN_SETS = {
             classic: { name: 'Clássico', items: ['🧳', '🎒', '👜', '💼', '👝', '🔒', '🕶️', '🎧'], price: 0 },
             summer: { name: 'Verão', items: ['⛱️', '🍍', '🍦', '🏄', '👙', '🌴', '🍹', '📸'], price: 500 },
@@ -156,8 +233,7 @@
             history: [] 
         };
 
-        // --- INICIALIZAÇÃO ---
-        function startGame() { showScreen('game-screen'); initLevel(); }
+        function startGame() { showScreen('game-screen'); initLevel(); if(!isMuted) startRelaxingMusic(); }
 
         function initLevel() {
             gameState.selected = null; gameState.history = [];
@@ -190,7 +266,7 @@
         function tapTube(idx) {
             const tubes = gameState.tubes;
             if (gameState.selected === null) {
-                if (tubes[idx].length > 0) { gameState.selected = idx; playTone(400, 0.1, 0.1); }
+                if (tubes[idx].length > 0) { gameState.selected = idx; playTone(400, 'sine', 0.1, 0.1); }
             } else {
                 const from = gameState.selected;
                 const to = idx;
@@ -199,7 +275,7 @@
                     if (tubes[to].length < 4 && (tubes[to].length === 0 || tubes[to][tubes[to].length-1] === item)) {
                         gameState.history.push(JSON.stringify(tubes));
                         tubes[to].push(tubes[from].pop());
-                        playTone(600, 0.1, 0.1);
+                        playTone(600, 'sine', 0.1, 0.1);
                         checkWin();
                     }
                 }
@@ -212,7 +288,7 @@
             const win = gameState.tubes.every(t => t.length === 0 || (t.length === 4 && t.every(v => v === t[0])));
             if (win) {
                 setTimeout(() => {
-                    alert("Fase concluída! +50 moedas");
+                    alert("Viagem concluída! +50 moedas");
                     gameState.level++; gameState.coins += 50;
                     initLevel();
                 }, 300);
@@ -234,81 +310,38 @@
         function renderStore(tab) {
             const list = document.getElementById('store-list');
             list.innerHTML = '';
-            
             document.getElementById('tab-power').classList.toggle('active', tab === 'powerups');
             document.getElementById('tab-skins').classList.toggle('active', tab === 'skins');
-
             if (tab === 'powerups') {
-                list.innerHTML = `
-                    <div class="store-item">
-                        <div><b>Bônus Viajante</b><br><small>Receba 500 moedas grátis</small></div>
-                        <button class="buy-btn" onclick="addCoins(500)">PEGAR</button>
-                    </div>
-                    <div class="store-item">
-                        <div><b>Tubo Extra</b><br><small>Compre durante o jogo</small></div>
-                        <span style="font-weight:bold; color:var(--primary)">150 💰</span>
-                    </div>
-                `;
+                list.innerHTML = `<div class="store-item"><div><b>Bônus</b><br><small>+500 moedas</small></div><button class="buy-btn" onclick="addCoins(500)">PEGAR</button></div>`;
             } else {
                 Object.keys(SKIN_SETS).forEach(id => {
                     const s = SKIN_SETS[id];
                     const isOwned = gameState.ownedSkins.includes(id);
                     const isActive = gameState.activeSkin === id;
-                    list.innerHTML += `
-                        <div class="store-item">
-                            <div><b>${s.name}</b><br><small>${s.items.slice(0,4).join('')}</small></div>
-                            <button class="buy-btn ${isOwned ? 'owned' : ''}" onclick="handleSkinClick('${id}')" ${isActive ? 'disabled' : ''}>
-                                ${isActive ? 'ATIVO' : (isOwned ? 'USAR' : s.price + ' 💰')}
-                            </button>
-                        </div>
-                    `;
+                    list.innerHTML += `<div class="store-item"><div><b>${s.name}</b><br><small>${s.items.slice(0,4).join('')}</small></div><button class="buy-btn ${isOwned ? 'owned' : ''}" onclick="handleSkinClick('${id}')" ${isActive ? 'disabled' : ''}>${isActive ? 'ATIVO' : (isOwned ? 'USAR' : s.price + ' 💰')}</button></div>`;
                 });
             }
         }
 
         function handleSkinClick(id) {
-            if (gameState.ownedSkins.includes(id)) {
-                gameState.activeSkin = id;
-            } else {
+            if (gameState.ownedSkins.includes(id)) { gameState.activeSkin = id; }
+            else {
                 const price = SKIN_SETS[id].price;
-                if (gameState.coins >= price) {
-                    gameState.coins -= price;
-                    gameState.ownedSkins.push(id);
-                    gameState.activeSkin = id;
-                } else {
-                    alert("Moedas insuficientes!");
-                }
+                if (gameState.coins >= price) { gameState.coins -= price; gameState.ownedSkins.push(id); gameState.activeSkin = id; }
+                else { alert("Moedas insuficientes!"); }
             }
             updateUI(); renderStore('skins');
         }
 
         function addCoins(n) { gameState.coins += n; updateUI(); renderStore('powerups'); }
-
         function undoMove() { if (gameState.history.length > 0) { gameState.tubes = JSON.parse(gameState.history.pop()); render(); } }
         function restartLevel() { if(confirm("Reiniciar fase?")) initLevel(); }
         function buyExtraTube() {
             if(gameState.coins >= 150) { gameState.coins -= 150; gameState.tubes.push([]); render(); updateUI(); }
             else { alert("Moedas insuficientes (150 necessário)"); }
         }
-        function useHint() { alert("Dica: Tente isolar uma cor em um tubo vazio!"); gameState.coins -= 20; updateUI(); }
-
-        // --- ÁUDIO ---
-        let audioCtx = null; let isMuted = true;
-        function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-        function toggleAudio() {
-            initAudio(); isMuted = !isMuted;
-            document.getElementById('audio-toggle').innerText = isMuted ? '🔇' : '🔊';
-            if (!isMuted && audioCtx.state === 'suspended') audioCtx.resume();
-        }
-        function playTone(freq, duration, vol) {
-            if (isMuted || !audioCtx) return;
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + duration);
-        }
+        function useHint() { alert("Dica: Foque em uma cor por vez!"); gameState.coins -= 20; updateUI(); }
     </script>
 </body>
 </html>
